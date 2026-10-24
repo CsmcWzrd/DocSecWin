@@ -1,0 +1,17 @@
+#ifndef LARGEFILE_H_INCLUDED
+#define LARGEFILE_H_INCLUDED
+
+#ifndef _LARGEFILE_SOURCE
+#define _LARGEFILE_SOURCE
+#endif
+
+#ifndef _LARGEFILE64_SOURCE
+#define _LARGEFILE64_SOURCE
+#endif
+
+#define _FILE_OFFSET_BITS 64
+//#define _LARGEFILE_SOURCE 1
+
+
+#endif // LARGEFILE_H_INCLUDED
+

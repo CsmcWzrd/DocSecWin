@@ -1,0 +1,9 @@
+/build/
+/data/
+*.o
+*.d
+*.exe
+/DocSecWin
+*.log
+
+/zar-stream-test
