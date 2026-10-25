@@ -7,3 +7,5 @@
 *.log
 
 /zar-stream-test
+
+/test-results/

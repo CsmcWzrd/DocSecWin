@@ -21,6 +21,7 @@ static void closeSocket(Socket s) { closesocket(s); }
 #else
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <netdb.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <signal.h>
@@ -129,7 +130,7 @@ static std::string reason(int code) {
     switch(code) {
     case 304:return "Not Modified"; case 200:return "OK"; case 201:return "Created"; case 204:return "No Content"; case 206:return "Partial Content";
     case 412:return "Precondition Failed"; case 416:return "Range Not Satisfiable"; case 422:return "Unprocessable Content"; case 507:return "Insufficient Storage";
-    case 400:return "Bad Request"; case 401:return "Unauthorized"; case 404:return "Not Found";
+    case 403:return "Forbidden"; case 400:return "Bad Request"; case 401:return "Unauthorized"; case 404:return "Not Found";
     case 405:return "Method Not Allowed"; case 408:return "Request Timeout";
     case 409:return "Conflict"; case 411:return "Length Required"; case 413:return "Content Too Large";
     case 415:return "Unsupported Media Type"; case 417:return "Expectation Failed";
@@ -169,19 +170,22 @@ void serve(const std::string& address, unsigned short port, const Handler& handl
 #else
     signal(SIGPIPE,SIG_IGN);
 #endif
-    Socket listener = socket(AF_INET,SOCK_STREAM,IPPROTO_TCP);
-    if (listener == badSocket) throw std::runtime_error("socket failed");
-    sockaddr_in addr{}; addr.sin_family = AF_INET; addr.sin_port = htons(port);
-    if (inet_pton(AF_INET,address.c_str(),&addr.sin_addr) != 1) { closeSocket(listener); throw std::runtime_error("numeric IPv4 bind address required"); }
+    addrinfo hints{};hints.ai_family=AF_UNSPEC;hints.ai_socktype=SOCK_STREAM;hints.ai_flags=AI_NUMERICHOST;
+    addrinfo* result=nullptr;
+    if(getaddrinfo(address.c_str(),std::to_string(port).c_str(),&hints,&result))throw std::runtime_error("numeric IPv4 or IPv6 bind address required");
+    std::unique_ptr<addrinfo,decltype(&freeaddrinfo)> addresses(result,freeaddrinfo);
+    Socket listener=badSocket;
+    for(auto addr=result;addr;addr=addr->ai_next){
+        Socket candidate=socket(addr->ai_family,addr->ai_socktype,addr->ai_protocol);if(candidate==badSocket)continue;
 #ifdef _WIN32
-    int exclusive=1;
-    setsockopt(listener,SOL_SOCKET,SO_EXCLUSIVEADDRUSE,reinterpret_cast<const char*>(&exclusive),sizeof exclusive);
+        int exclusive=1;setsockopt(candidate,SOL_SOCKET,SO_EXCLUSIVEADDRUSE,reinterpret_cast<const char*>(&exclusive),sizeof exclusive);
 #else
-    int reuse=1; setsockopt(listener,SOL_SOCKET,SO_REUSEADDR,&reuse,sizeof reuse);
+        int reuse=1;setsockopt(candidate,SOL_SOCKET,SO_REUSEADDR,&reuse,sizeof reuse);
 #endif
-    if (bind(listener,reinterpret_cast<sockaddr*>(&addr),sizeof addr) || listen(listener,64)) {
-        closeSocket(listener); throw std::runtime_error("bind/listen failed");
+        if(addr->ai_family==AF_INET6){int only=1;setsockopt(candidate,IPPROTO_IPV6,IPV6_V6ONLY,reinterpret_cast<const char*>(&only),sizeof only);}
+        if(bind(candidate,addr->ai_addr,static_cast<int>(addr->ai_addrlen))==0&&listen(candidate,64)==0){listener=candidate;break;}closeSocket(candidate);
     }
+    if(listener==badSocket)throw std::runtime_error("bind/listen failed");
     struct Shared { std::mutex mutex; std::condition_variable cv; std::deque<Socket> queue; bool done=false; } shared;
     std::vector<std::thread> workers;
     for (int i=0;i<8;++i) workers.emplace_back([&,i] {

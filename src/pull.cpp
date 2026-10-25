@@ -21,8 +21,22 @@ Json getJson(const Origin& peer,const std::string& token,const std::string& path
 Request localRequest(const std::string& method,const std::string& path,const std::string& body){Request r;r.method=method;r.target=path;r.bodyLength=body.size();auto text=std::make_shared<std::string>(body);auto pos=std::make_shared<size_t>(0);r.readBody=[text,pos](char* p,size_t n){n=std::min(n,text->size()-*pos);std::memcpy(p,text->data()+*pos,n);*pos+=n;return n;};return r;}
 std::string sourceBase(const std::string& source){return source.compare(0,internal.size()+1,internal+"/")==0?internal:api;}
 }
-PullService::PullService(Database& db,const fs::path& root):database(db){auto path=root/"peers.conf";rejectSymlink(path);if(!fs::exists(path))return;std::ifstream in(path);if(!in)throw std::runtime_error("cannot read peers.conf");std::string line;while(std::getline(in,line)){if(line.empty()||line[0]=='#')continue;std::istringstream fields(line);std::string name,url,extra;if(!(fields>>name>>url)||(fields>>extra)||!identifier(name))throw std::runtime_error("invalid peers.conf entry; expected NAME ORIGIN");if(!peers.emplace(name,parseOrigin(url)).second)throw std::runtime_error("duplicate peer name");}}
-Response PullService::listPeers() const {Json result=Json::obj();result["peers"]=Json::arr();for(const auto& p:peers){Json item=Json::obj();item["name"]=Json(p.first);item["origin"]=Json(p.second.scheme+"://"+p.second.authority);result["peers"].array.push_back(item);}Response r;r.body=result.dump();return r;}
+PullService::PullService(Database& db,const fs::path& root):database(db){
+    auto path=root/"peers.conf";rejectSymlink(path);if(!fs::exists(path))return;std::ifstream in(path);if(!in)throw std::runtime_error("cannot read peers.conf");
+    std::string line;while(std::getline(in,line)){auto start=line.find_first_not_of(" \t\r");if(start==std::string::npos||line[start]=='#')continue;
+        std::istringstream fields(line);std::string name,url,mode,extra;
+        if(!(fields>>name>>url)||!identifier(name))throw std::runtime_error("invalid peers.conf entry");
+        Origin origin=parseOrigin(url);if(fields>>mode){if(mode!="public"&&mode!="internal")throw std::runtime_error("peer API mode must be public or internal");if(fields>>extra)throw std::runtime_error("extra peers.conf fields");if(mode=="internal")origin.apiPrefix=internal;}
+        if(!peers.emplace(name,std::move(origin)).second)throw std::runtime_error("duplicate peer name");
+    }
+}
+std::pair<std::string,Origin> PullService::selectPeer(const std::string& target) const {
+    auto selector=parsePeerTarget(target);std::pair<std::string,Origin> selected;size_t matches=0;
+    for(const auto& peer:peers)if(peer.second.host==selector.host&&(!selector.explicitPort||peer.second.port==selector.port)){selected=peer;++matches;}
+    if(!matches)throw HttpError(403,"trigger target is not configured in peers.conf");
+    if(matches>1)throw HttpError(409,"trigger target is ambiguous; specify a unique configured host and port");return selected;
+}
+Response PullService::listPeers() const {Json result=Json::obj();result["peers"]=Json::arr();for(const auto& p:peers){Json item=Json::obj();item["name"]=Json(p.first);item["origin"]=Json(p.second.scheme+"://"+p.second.authority);item["api_prefix"]=Json(p.second.apiPrefix);result["peers"].array.push_back(item);}Response r;r.body=result.dump();return r;}
 Response PullService::pull(const std::string& user,const Request& request){
     auto input=Json::parse(request.readText(64*1024));if(input.type!=Json::Object)throw HttpError(400,"pull JSON object required");
     for(const auto& x:input.object)if(x.first!="peer"&&x.first!="source_path"&&x.first!="destination_path"&&x.first!="source_token"&&x.first!="recursive"&&x.first!="overwrite")throw HttpError(400,"unsupported pull option: "+x.first);

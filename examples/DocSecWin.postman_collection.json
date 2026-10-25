@@ -1,0 +1,83 @@
+{
+  "info": {
+    "name": "DocSecWin gathering and separate local retrieval",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "backend",
+      "value": "http://127.0.0.1:8081"
+    },
+    {
+      "key": "peer",
+      "value": "127.0.0.1:8080"
+    },
+    {
+      "key": "local_token",
+      "value": ""
+    },
+    {
+      "key": "remote_token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Gather (empty response body)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{local_token}}"
+          },
+          {
+            "key": "Client-Identifier",
+            "value": "pretend-to-be-client:{{peer}}"
+          },
+          {
+            "key": "X-DocSec-Source-Authorization",
+            "value": "Bearer {{remote_token}}"
+          }
+        ],
+        "url": "{{backend}}/api/v1/internal/local/documents/manual/sections/intro/data/file"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"No trigger payload\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read local copy (separate authenticated request)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{local_token}}"
+          }
+        ],
+        "url": "{{backend}}/api/v1/internal/local/documents/manual/sections/intro/data/file"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

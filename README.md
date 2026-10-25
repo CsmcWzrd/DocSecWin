@@ -1,4 +1,4 @@
-# DocSecWin 0.2.0
+# DocSecWin 0.3.0
 
 Native C++17 HTTP/1.1 Document ↔ Section ↔ Information/Data server, with notes,
 metadata queries, large-file streaming, and internal server-to-server pulls.
@@ -7,6 +7,12 @@ is removed; the executable does not require Python. Optional integration
 tests use Python as a client only.
 
 ## New in this release
+
+- Client-identifier gathering triggers save peer data locally and return only
+  HTTP status with an empty body; retrieve it later with an authenticated query
+  without the marker. See the [backend guide](docs/BACKEND.md).
+- Portable regression runners for shell, Windows cmd and PowerShell with JSON
+  and JUnit reports. See [regression instructions](docs/REGRESSION.md).
 
 - POST creation, PUT store/update, PATCH metadata, GET/HEAD retrieval and DELETE.
 - Notes on documents and sections; CLOB/BLOB/JSON/XML-like data and raw files.
@@ -60,7 +66,7 @@ BUILD_TESTING is enabled.
 
 add-user reads a 12–1024-byte password from stdin (interactive input currently
 echoes). The default listener is 127.0.0.1:8080; optionally specify a numeric
-IPv4 bind address as the fifth argument. Stop with Ctrl+C.
+IPv4 or IPv6 bind address as the fifth argument. Stop with Ctrl+C.
 
 ## Modes and endpoints
 

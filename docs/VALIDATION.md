@@ -1,4 +1,4 @@
-# Validation — 25 October 2026, release 0.2.0
+# Validation — 25 October 2026, release 0.3.0
 
 Linux build: GCC 13.3.0, C++17, OpenSSL 3.0.13, GNU Make.
 The optimized server build completed. Twelve integration scenarios passed:
@@ -42,6 +42,19 @@ The OpenAPI JSON was parsed and its path/request schema references checked.
 No interpreter backend, Python.h include, Python bindings or script dispatch
 is present in the native server build. Optional Python code is a test client.
 
+## Status-only trigger regression
+
+The updated optimized Linux build passed all 12 baseline integration tests and
+13 trigger regression tests, plus native Zar stream/5 GiB sparse-offset checks.
+Trigger tests exercise IPv4, hostname aliases, IPv6, curl, browser CORS, notes,
+metadata, ranges, selectors/projections, unchanged revisions, changed content,
+user isolation, remote authentication failures and restart persistence. They
+assert empty response bodies and Content-Length: 0 for trigger helper requests;
+separate authenticated requests verify locally stored content and metadata.
+JSON and JUnit suite reports and captured logs are included under test-results/.
+The sanitizer result above covers the earlier baseline; it has not been rerun
+for this status-only change. Windows/macOS execution remains unverified.
+
 ## Outstanding qualification / scope
 
 CMake execution and native Windows/macOS builds were not available here.
@@ -52,7 +65,7 @@ those OS paths; this is not a claim that they have been executed or passed.
 Compiler warnings remain in the adapted and compact implementation sources;
 the build is not represented as warning-free.
 
-No native inbound TLS, IPv6 listener/peer origin, Windows service installation,
+No native inbound TLS, Windows service installation,
 resumable/chunked upload, full-text/payload JSON indexing, history API, automatic
 GC, online backup, encryption at rest, background pull scheduling, distributed
 transaction or point-in-time subtree replication is implemented. Internal pulls

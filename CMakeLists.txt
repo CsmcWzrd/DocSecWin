@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
-project(DocSecWin VERSION 0.2.0 LANGUAGES CXX)
+project(DocSecWin VERSION 0.3.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(OpenSSL REQUIRED)
 find_package(Threads REQUIRED)
 set(H third_party/httpdwin)
 set(Z third_party/Zar)
-add_executable(DocSecWin src/main.cpp src/database.cpp src/security.cpp src/peer_client.cpp src/pull.cpp
+add_executable(DocSecWin src/main.cpp src/database.cpp src/security.cpp src/peer_client.cpp src/pull.cpp src/trigger.cpp src/cors.cpp
  ${H}/docsec_http.cpp ${H}/httpresponse.cpp ${H}/httprequest.cpp
  ${H}/httpheaders.cpp ${H}/cookie.cpp
  ${Z}/src/zar_header.cpp ${Z}/src/zar_store.cpp ${Z}/src/zar_utils.cpp ${Z}/src/zar_stream.cpp)
@@ -26,6 +26,7 @@ if(BUILD_TESTING)
  find_package(Python3 COMPONENTS Interpreter)
  if(Python3_FOUND)
   add_test(NAME integration COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/integration.py $<TARGET_FILE:DocSecWin>)
+  add_test(NAME trigger-regression COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/trigger_regression.py $<TARGET_FILE:DocSecWin>)
  endif()
 endif()
 install(TARGETS DocSecWin RUNTIME DESTINATION bin)

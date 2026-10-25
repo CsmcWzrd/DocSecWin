@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "DocSecWin",
-    "version": "0.2.0",
-    "description": "See API.md and BACKEND.md for byte-preserving storage, metadata selector semantics, and backend-only routing."
+    "version": "0.3.0",
+    "description": "See API.md and BACKEND.md for byte-preserving storage, metadata selector semantics, and backend-only routing. Client-Identifier gathering triggers store peer information locally and return HTTP status only (empty body on success and error). Separate authenticated unmarked requests retrieve local information; see BACKEND.md."
   },
   "servers": [
     {
@@ -22,7 +22,7 @@
         "summary": "List/select metadata; sort timestamp descending for reverse chronology",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
@@ -728,6 +728,24 @@
               "minimum": 0,
               "maximum": 18446744073709551615
             }
+          },
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
           }
         ]
       },
@@ -790,7 +808,7 @@
         "summary": "Retrieve metadata",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
@@ -807,6 +825,24 @@
           {
             "name": "If-None-Match",
             "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
             "schema": {
               "type": "string"
             }
@@ -909,12 +945,32 @@
         "summary": "Retrieve searchable metadata without payload",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       },
       "head": {
         "summary": "Metadata headers",
@@ -955,7 +1011,7 @@
         "summary": "DocumentDB-style metadata query",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
@@ -970,7 +1026,27 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       }
     },
     "/api/v1/documents/{document}/sections": {
@@ -989,7 +1065,7 @@
         "summary": "List/select metadata; sort timestamp descending for reverse chronology",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
@@ -1695,6 +1771,24 @@
               "minimum": 0,
               "maximum": 18446744073709551615
             }
+          },
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
           }
         ]
       },
@@ -1766,7 +1860,7 @@
         "summary": "Retrieve metadata",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
@@ -1783,6 +1877,24 @@
           {
             "name": "If-None-Match",
             "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
             "schema": {
               "type": "string"
             }
@@ -1894,12 +2006,32 @@
         "summary": "Retrieve searchable metadata without payload",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       },
       "head": {
         "summary": "Metadata headers",
@@ -1950,7 +2082,7 @@
         "summary": "DocumentDB-style metadata query",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
@@ -1965,7 +2097,27 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       }
     },
     "/api/v1/documents/{document}/notes": {
@@ -1984,7 +2136,7 @@
         "summary": "List/select metadata; sort timestamp descending for reverse chronology",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
@@ -2690,6 +2842,24 @@
               "minimum": 0,
               "maximum": 18446744073709551615
             }
+          },
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
           }
         ]
       },
@@ -2762,7 +2932,7 @@
         "summary": "Retrieve exact bytes; supports a single byte range",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
@@ -2799,6 +2969,24 @@
           {
             "name": "If-Range",
             "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
             "schema": {
               "type": "string"
             }
@@ -2905,12 +3093,32 @@
         "summary": "Retrieve searchable metadata without payload",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       },
       "head": {
         "summary": "Metadata headers",
@@ -2961,7 +3169,7 @@
         "summary": "DocumentDB-style metadata query",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
@@ -2976,7 +3184,27 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       }
     },
     "/api/v1/documents/{document}/notes/{note}/verify": {
@@ -3004,12 +3232,32 @@
         "summary": "Scan complete file and verify Zar checksum and SHA-256",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       }
     },
     "/api/v1/documents/{document}/sections/{section}/notes": {
@@ -3037,7 +3285,7 @@
         "summary": "List/select metadata; sort timestamp descending for reverse chronology",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
@@ -3743,6 +3991,24 @@
               "minimum": 0,
               "maximum": 18446744073709551615
             }
+          },
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
           }
         ]
       },
@@ -3824,7 +4090,7 @@
         "summary": "Retrieve exact bytes; supports a single byte range",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
@@ -3861,6 +4127,24 @@
           {
             "name": "If-Range",
             "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
             "schema": {
               "type": "string"
             }
@@ -3976,12 +4260,32 @@
         "summary": "Retrieve searchable metadata without payload",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       },
       "head": {
         "summary": "Metadata headers",
@@ -4041,7 +4345,7 @@
         "summary": "DocumentDB-style metadata query",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
@@ -4056,7 +4360,27 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       }
     },
     "/api/v1/documents/{document}/sections/{section}/notes/{note}/verify": {
@@ -4093,12 +4417,32 @@
         "summary": "Scan complete file and verify Zar checksum and SHA-256",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       }
     },
     "/api/v1/documents/{document}/sections/{section}/data": {
@@ -4126,7 +4470,7 @@
         "summary": "List/select metadata; sort timestamp descending for reverse chronology",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
@@ -4832,6 +5176,24 @@
               "minimum": 0,
               "maximum": 18446744073709551615
             }
+          },
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
           }
         ]
       },
@@ -4913,7 +5275,7 @@
         "summary": "Retrieve exact bytes; supports a single byte range",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
@@ -4950,6 +5312,24 @@
           {
             "name": "If-Range",
             "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
             "schema": {
               "type": "string"
             }
@@ -5065,12 +5445,32 @@
         "summary": "Retrieve searchable metadata without payload",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       },
       "head": {
         "summary": "Metadata headers",
@@ -5130,7 +5530,7 @@
         "summary": "DocumentDB-style metadata query",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
@@ -5145,7 +5545,27 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       }
     },
     "/api/v1/documents/{document}/sections/{section}/data/{item}/verify": {
@@ -5182,12 +5602,32 @@
         "summary": "Scan complete file and verify Zar checksum and SHA-256",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; when a gathering marker is present, information is saved locally and this response has an empty body (Content-Length: 0)."
           },
           "default": {
             "description": "JSON error"
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "Client-Identifier",
+            "in": "header",
+            "required": false,
+            "description": "pretend-to-be-client:<configured hostname/IPv4/IPv6[:port]> triggers local gathering. No fetched content or listing is returned. Success: 200 with empty body. Errors: HTTP error status with empty body. Requires separate local and source credentials.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-DocSec-Source-Authorization",
+            "in": "header",
+            "required": false,
+            "description": "Bearer REMOTE_TOKEN; required when the gathering marker is present.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       }
     },
     "/api/v1/internal/local/documents": {
